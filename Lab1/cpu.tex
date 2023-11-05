@@ -270,7 +270,8 @@ stress-ng: info:  [3347] load average: 1,09 0,69 0,30
 \includegraphics[width=\textwidth]{image/perf.png}
 Строим по выводу Flame Graph.\\
 \includegraphics[width=\textwidth]{image/flamegraph.png}
-\subsection{Переходим к активным действиям: nice}
+\subsection{Переходим к активным действиям}
+\subsubsection{Команда nice}
 Повысим приоритет нашего процесса с помощью команды \textit{nice}.\\
 Чтобы была конкуренция за ресурс процессора, мы запустим тест на все ядра (8 ядер)\\
 \includegraphics[width=\textwidth]{image/nice.png}
@@ -488,12 +489,12 @@ Core	CPU	TSC_MHz	IRQ	SMI	POLL	C1	POLL%	C1%	CPU%c1	CPU%c3	CPU%c6	CPU%c7	CoreTmp	P
 6	6	2304	1295	0	0	0	0.00	0.00	100.00	0.00	0.00	0.00	178
 7	7	2304	1229	0	0	0	0.00	0.00	100.00	0.00	0.00	0.00	178
 \end{verbatim}
-\subsection{uptime}
+\subsubsection{uptime}
 \begin{verbatim}
 alexey@alexey-ubuntu:~$ uptime
 17:50:29 up  1:07,  1 user,  load average: 8,11, 4,01, 2,21
 \end{verbatim}
-\subsection{numastat}
+\subsubsection{numastat}
 \begin{verbatim}
 alexey@alexey-ubuntu:~$ numastat -cm
 
