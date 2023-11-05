@@ -1,0 +1,8 @@
+./l1cache-fence.zsh > ~/output.txt 
+stress-ng: info:  [169289] setting to a 30 second run per stressor
+stress-ng: info:  [169289] dispatching hogs: 8 l1cache
+stress-ng: info:  [169290] stress-ng-l1cache: l1cache: size: 32.0K, sets: 1000, ways: 8, line size: 64
+stress-ng: info:  [169289] successful run completed in 30.38s
+stress-ng: info:  [169289] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [169289]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [169289] l1cache          283000     30.16    235.41      1.12      9382.93        1196.47        98.03

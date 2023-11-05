@@ -1,0 +1,145 @@
+
+./l1cache-testing.bash                                                                                                                                 
+run with l1cache=1
+stress-ng: info:  [114470] setting to a 2 second run per stressor
+stress-ng: info:  [114470] dispatching hogs: 1 l1cache
+stress-ng: info:  [114471] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114470] successful run completed in 2.13s
+stress-ng: info:  [114470] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114470]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114470] l1cache             320      2.13      2.12      0.00       150.50         150.94        99.70
+
+run with l1cache=2
+stress-ng: info:  [114480] setting to a 2 second run per stressor
+stress-ng: info:  [114480] dispatching hogs: 2 l1cache
+stress-ng: info:  [114481] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114480] successful run completed in 2.24s
+stress-ng: info:  [114480] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114480]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114480] l1cache             640      2.23      4.45      0.00       286.63         143.82        99.65
+
+run with l1cache=3
+stress-ng: info:  [114491] setting to a 2 second run per stressor
+stress-ng: info:  [114491] dispatching hogs: 3 l1cache
+stress-ng: info:  [114492] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114491] successful run completed in 2.17s
+stress-ng: info:  [114491] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114491]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114491] l1cache             960      2.15      6.45      0.00       445.71         148.84        99.82
+
+run with l1cache=4
+stress-ng: info:  [114503] setting to a 2 second run per stressor
+stress-ng: info:  [114503] dispatching hogs: 4 l1cache
+stress-ng: info:  [114504] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114503] successful run completed in 2.39s
+stress-ng: info:  [114503] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114503]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114503] l1cache            1088      2.13      8.50      0.00       509.85         128.00        99.58
+
+run with l1cache=5
+stress-ng: info:  [114516] setting to a 2 second run per stressor
+stress-ng: info:  [114516] dispatching hogs: 5 l1cache
+stress-ng: info:  [114517] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114516] successful run completed in 2.34s
+stress-ng: info:  [114516] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114516]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114516] l1cache            1280      2.29     11.41      0.00       559.11         112.18        99.68
+
+run with l1cache=6
+stress-ng: info:  [114533] setting to a 2 second run per stressor
+stress-ng: info:  [114533] dispatching hogs: 6 l1cache
+stress-ng: info:  [114534] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114533] successful run completed in 2.52s
+stress-ng: info:  [114533] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114533]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114533] l1cache            1408      2.36     14.08      0.00       596.64         100.00        99.44
+
+run with l1cache=7
+stress-ng: info:  [114548] setting to a 2 second run per stressor
+stress-ng: info:  [114548] dispatching hogs: 7 l1cache
+stress-ng: info:  [114549] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114548] successful run completed in 2.29s
+stress-ng: info:  [114548] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114548]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114548] l1cache            1344      2.24     15.62      0.01       598.99          85.99        99.51
+
+run with l1cache=8
+stress-ng: info:  [114564] setting to a 2 second run per stressor
+stress-ng: info:  [114564] dispatching hogs: 8 l1cache
+stress-ng: info:  [114565] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114564] successful run completed in 2.65s
+stress-ng: info:  [114564] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114564]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114564] l1cache            1408      2.47     19.19      0.12       570.22          72.92        97.75
+
+run with l1cache=9
+stress-ng: info:  [114581] setting to a 2 second run per stressor
+stress-ng: info:  [114581] dispatching hogs: 9 l1cache
+stress-ng: info:  [114582] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114581] successful run completed in 2.78s
+stress-ng: info:  [114581] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114581]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114581] l1cache            1408      2.49     19.72      0.14       565.79          70.90        88.67
+
+run with l1cache=10
+stress-ng: info:  [114599] setting to a 2 second run per stressor
+stress-ng: info:  [114599] dispatching hogs: 10 l1cache
+stress-ng: info:  [114600] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114599] successful run completed in 2.56s
+stress-ng: info:  [114599] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114599]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114599] l1cache            1408      2.27     18.05      0.10       620.04          77.58        79.93
+
+run with l1cache=11
+stress-ng: info:  [114618] setting to a 2 second run per stressor
+stress-ng: info:  [114618] dispatching hogs: 11 l1cache
+stress-ng: info:  [114619] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114618] successful run completed in 2.68s
+stress-ng: info:  [114618] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114618]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114618] l1cache            1536      2.43     19.64      0.07       631.13          77.93        73.62
+
+run with l1cache=12
+stress-ng: info:  [114641] setting to a 2 second run per stressor
+stress-ng: info:  [114641] dispatching hogs: 12 l1cache
+stress-ng: info:  [114642] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114641] successful run completed in 2.84s
+stress-ng: info:  [114641] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114641]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114641] l1cache            1664      2.64     21.47      0.11       630.08          77.11        68.09
+
+run with l1cache=13
+stress-ng: info:  [114662] setting to a 2 second run per stressor
+stress-ng: info:  [114662] dispatching hogs: 13 l1cache
+stress-ng: info:  [114663] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114662] successful run completed in 2.88s
+stress-ng: info:  [114662] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114662]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114662] l1cache            1664      2.55     21.28      0.12       653.19          77.76        64.62
+
+run with l1cache=14
+stress-ng: info:  [114684] setting to a 2 second run per stressor
+stress-ng: info:  [114684] dispatching hogs: 14 l1cache
+stress-ng: info:  [114685] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114684] successful run completed in 3.05s
+stress-ng: info:  [114684] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114684]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114684] l1cache            1728      2.78     23.07      0.10       622.63          74.58        59.63
+
+run with l1cache=15
+stress-ng: info:  [114710] setting to a 2 second run per stressor
+stress-ng: info:  [114710] dispatching hogs: 15 l1cache
+stress-ng: info:  [114711] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114710] successful run completed in 3.19s
+stress-ng: info:  [114710] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114710]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114710] l1cache            1920      2.93     24.26      0.12       655.63          78.75        55.50
+
+run with l1cache=16
+stress-ng: info:  [114737] setting to a 2 second run per stressor
+stress-ng: info:  [114737] dispatching hogs: 16 l1cache
+stress-ng: info:  [114738] stress-ng-l1cache: l1cache: size: 32.0K, sets: 64, ways: 8, line size: 64
+stress-ng: info:  [114737] successful run completed in 3.40s
+stress-ng: info:  [114737] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [114737]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [114737] l1cache            2048      3.24     26.16      0.11       632.94          77.96        50.74

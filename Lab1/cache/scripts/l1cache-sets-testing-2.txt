@@ -1,0 +1,143 @@
+./l1cache-sets-testing-2.zsh > ~/output2.txt 
+stress-ng: info:  [163942] setting to a 30 second run per stressor
+stress-ng: info:  [163942] dispatching hogs: 8 l1cache
+stress-ng: info:  [163943] stress-ng-l1cache: l1cache: size: 32.0K, sets: 100, ways: 8, line size: 64
+stress-ng: info:  [163942] successful run completed in 30.52s
+stress-ng: info:  [163942] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [163942]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [163942] l1cache           26800     30.37    233.71      2.18       882.42         113.61        97.09
+stress-ng: info:  [164026] setting to a 30 second run per stressor
+stress-ng: info:  [164026] dispatching hogs: 8 l1cache
+stress-ng: info:  [164027] stress-ng-l1cache: l1cache: size: 32.0K, sets: 200, ways: 8, line size: 64
+stress-ng: info:  [164026] successful run completed in 30.50s
+stress-ng: info:  [164026] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164026]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164026] l1cache           55200     30.31    235.99      1.28      1821.41         232.65        97.86
+stress-ng: info:  [164112] setting to a 30 second run per stressor
+stress-ng: info:  [164112] dispatching hogs: 8 l1cache
+stress-ng: info:  [164113] stress-ng-l1cache: l1cache: size: 32.0K, sets: 300, ways: 8, line size: 64
+stress-ng: info:  [164112] unsuccessful run completed in 1.34s
+stress-ng: info:  [164112] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164112]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164112] l1cache            2400      0.00      0.00      0.00         0.00           0.00         0.00
+stress-ng: fail:  [164112] l1cache instance 0 corrupted bogo-ops counter, 300 vs 0
+stress-ng: fail:  [164112] l1cache instance 0 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] l1cache instance 1 corrupted bogo-ops counter, 300 vs 0
+stress-ng: fail:  [164112] l1cache instance 1 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] l1cache instance 2 corrupted bogo-ops counter, 300 vs 0
+info: 5 failures reached, aborting stress process
+stress-ng: fail:  [164112] l1cache instance 2 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] l1cache instance 3 corrupted bogo-ops counter, 300 vs 0
+stress-ng: fail:  [164112] l1cache instance 3 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] l1cache instance 4 corrupted bogo-ops counter, 300 vs 0
+stress-ng: fail:  [164112] l1cache instance 4 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] l1cache instance 5 corrupted bogo-ops counter, 300 vs 0
+stress-ng: fail:  [164112] l1cache instance 5 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] l1cache instance 6 corrupted bogo-ops counter, 300 vs 0
+stress-ng: fail:  [164112] l1cache instance 6 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] l1cache instance 7 corrupted bogo-ops counter, 300 vs 0
+stress-ng: fail:  [164112] l1cache instance 7 hash error in bogo-ops counter and run flag, 2376471003 vs 0
+stress-ng: fail:  [164112] metrics-check: stressor metrics corrupted, data is compromised
+stress-ng: info:  [164132] setting to a 30 second run per stressor
+stress-ng: info:  [164132] dispatching hogs: 8 l1cache
+stress-ng: info:  [164133] stress-ng-l1cache: l1cache: size: 32.0K, sets: 400, ways: 8, line size: 64
+stress-ng: info:  [164132] successful run completed in 30.55s
+stress-ng: info:  [164132] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164132]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164132] l1cache          111600     30.39    237.40      1.17      3671.66         467.79        98.11
+stress-ng: info:  [164216] setting to a 30 second run per stressor
+stress-ng: info:  [164216] dispatching hogs: 8 l1cache
+stress-ng: info:  [164217] stress-ng-l1cache: l1cache: size: 32.0K, sets: 500, ways: 8, line size: 64
+stress-ng: info:  [164216] successful run completed in 30.55s
+stress-ng: info:  [164216] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164216]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164216] l1cache          125000     30.28    235.22      1.44      4128.48         528.18        97.70
+stress-ng: info:  [164302] setting to a 30 second run per stressor
+stress-ng: info:  [164302] dispatching hogs: 8 l1cache
+stress-ng: info:  [164303] stress-ng-l1cache: l1cache: size: 32.0K, sets: 600, ways: 8, line size: 64
+stress-ng: info:  [164302] unsuccessful run completed in 1.34s
+stress-ng: info:  [164302] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164302]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164302] l1cache            4800      0.00      0.00      0.00         0.00           0.00         0.00
+stress-ng: fail:  [164302] l1cache instance 0 corrupted bogo-ops counter, 600 vs 0
+stress-ng: fail:  [164302] l1cache instance 0 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] l1cache instance 1 corrupted bogo-ops counter, 600 vs 0
+stress-ng: fail:  [164302] l1cache instance 1 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] l1cache instance 2 corrupted bogo-ops counter, 600 vs 0
+info: 5 failures reached, aborting stress process
+stress-ng: fail:  [164302] l1cache instance 2 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] l1cache instance 3 corrupted bogo-ops counter, 600 vs 0
+stress-ng: fail:  [164302] l1cache instance 3 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] l1cache instance 4 corrupted bogo-ops counter, 600 vs 0
+stress-ng: fail:  [164302] l1cache instance 4 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] l1cache instance 5 corrupted bogo-ops counter, 600 vs 0
+stress-ng: fail:  [164302] l1cache instance 5 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] l1cache instance 6 corrupted bogo-ops counter, 600 vs 0
+stress-ng: fail:  [164302] l1cache instance 6 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] l1cache instance 7 corrupted bogo-ops counter, 600 vs 0
+stress-ng: fail:  [164302] l1cache instance 7 hash error in bogo-ops counter and run flag, 2180212424 vs 0
+stress-ng: fail:  [164302] metrics-check: stressor metrics corrupted, data is compromised
+stress-ng: info:  [164323] setting to a 30 second run per stressor
+stress-ng: info:  [164323] dispatching hogs: 8 l1cache
+stress-ng: info:  [164324] stress-ng-l1cache: l1cache: size: 32.0K, sets: 700, ways: 8, line size: 64
+stress-ng: info:  [164323] unsuccessful run completed in 1.37s
+stress-ng: info:  [164323] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164323]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164323] l1cache            5600      0.00      0.00      0.00         0.00           0.00         0.00
+stress-ng: fail:  [164323] l1cache instance 0 corrupted bogo-ops counter, 700 vs 0
+stress-ng: fail:  [164323] l1cache instance 0 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] l1cache instance 1 corrupted bogo-ops counter, 700 vs 0
+stress-ng: fail:  [164323] l1cache instance 1 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] l1cache instance 2 corrupted bogo-ops counter, 700 vs 0
+info: 5 failures reached, aborting stress process
+stress-ng: fail:  [164323] l1cache instance 2 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] l1cache instance 3 corrupted bogo-ops counter, 700 vs 0
+stress-ng: fail:  [164323] l1cache instance 3 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] l1cache instance 4 corrupted bogo-ops counter, 700 vs 0
+stress-ng: fail:  [164323] l1cache instance 4 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] l1cache instance 5 corrupted bogo-ops counter, 700 vs 0
+stress-ng: fail:  [164323] l1cache instance 5 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] l1cache instance 6 corrupted bogo-ops counter, 700 vs 0
+stress-ng: fail:  [164323] l1cache instance 6 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] l1cache instance 7 corrupted bogo-ops counter, 700 vs 0
+stress-ng: fail:  [164323] l1cache instance 7 hash error in bogo-ops counter and run flag, 880303143 vs 0
+stress-ng: fail:  [164323] metrics-check: stressor metrics corrupted, data is compromised
+stress-ng: info:  [164343] setting to a 30 second run per stressor
+stress-ng: info:  [164343] dispatching hogs: 8 l1cache
+stress-ng: info:  [164344] stress-ng-l1cache: l1cache: size: 32.0K, sets: 800, ways: 8, line size: 64
+stress-ng: info:  [164343] successful run completed in 30.47s
+stress-ng: info:  [164343] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164343]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164343] l1cache          217600     30.25    236.04      1.24      7193.61         917.06        98.05
+stress-ng: info:  [164430] setting to a 30 second run per stressor
+stress-ng: info:  [164430] dispatching hogs: 8 l1cache
+stress-ng: info:  [164431] stress-ng-l1cache: l1cache: size: 32.0K, sets: 900, ways: 8, line size: 64
+stress-ng: info:  [164430] unsuccessful run completed in 1.44s
+stress-ng: info:  [164430] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164430]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164430] l1cache            7200      0.00      0.00      0.00         0.00           0.00         0.00
+stress-ng: fail:  [164430] l1cache instance 0 corrupted bogo-ops counter, 900 vs 0
+stress-ng: fail:  [164430] l1cache instance 0 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] l1cache instance 1 corrupted bogo-ops counter, 900 vs 0
+stress-ng: fail:  [164430] l1cache instance 1 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] l1cache instance 2 corrupted bogo-ops counter, 900 vs 0
+info: 5 failures reached, aborting stress process
+stress-ng: fail:  [164430] l1cache instance 2 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] l1cache instance 3 corrupted bogo-ops counter, 900 vs 0
+stress-ng: fail:  [164430] l1cache instance 3 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] l1cache instance 4 corrupted bogo-ops counter, 900 vs 0
+stress-ng: fail:  [164430] l1cache instance 4 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] l1cache instance 5 corrupted bogo-ops counter, 900 vs 0
+stress-ng: fail:  [164430] l1cache instance 5 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] l1cache instance 6 corrupted bogo-ops counter, 900 vs 0
+stress-ng: fail:  [164430] l1cache instance 6 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] l1cache instance 7 corrupted bogo-ops counter, 900 vs 0
+stress-ng: fail:  [164430] l1cache instance 7 hash error in bogo-ops counter and run flag, 3102073538 vs 0
+stress-ng: fail:  [164430] metrics-check: stressor metrics corrupted, data is compromised
+stress-ng: info:  [164450] setting to a 30 second run per stressor
+stress-ng: info:  [164450] dispatching hogs: 8 l1cache
+stress-ng: info:  [164451] stress-ng-l1cache: l1cache: size: 32.0K, sets: 1000, ways: 8, line size: 64
+stress-ng: info:  [164450] successful run completed in 30.66s
+stress-ng: info:  [164450] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s CPU used per
+stress-ng: info:  [164450]                           (secs)    (secs)    (secs)   (real time) (usr+sys time) instance (%)
+stress-ng: info:  [164450] l1cache          268000     30.42    236.70      1.45      8810.88        1125.34        97.87
