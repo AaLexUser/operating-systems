@@ -22,6 +22,10 @@ specify 3 out of the 4 cache geometric parameters, these are as follows:}
 \includegraphics[width=\textwidth]{./cache/image/l1cache-each-idle-cpu.png}
 Видим, что после 8 workers наши ядра заняты посностью, что соответсвует количеству виртуальных ядер на процессоре.\\
 Так же из графиков видно, что если не все ядра заняты работой, то может произойти переключение на другое ядро из-за чего может упасть производительность.\\
+Проверим наши доводы построив график \textit{bogo ops} от \textit{l1cache}.\\
+\includegraphics[width=\textwidth]{./cache/image/l1cache-bogops.png}
+Видим, хоть с увеличением воркеров растет bogo ops, но нагрузка на каждый CPU (после 8 воркеров) падает. \\
+Это увеличивает время ожидания в блокировке.\\
 \textbf{Вывод:} оптимальное значение параметра l1cache равно 8.
 \subsection{l1cache-sets}
 Из документации stress-ng:
@@ -78,6 +82,9 @@ stress-ng: info:  [161315] l1cache            2264     30.47    238.64      1.11
 \textbf{sys time}\\
 \includegraphics[width=\textwidth]{./cache/image/l1cache-sets-sys-cpu-2.png}
 \textbf{Вывод:} чем больше set, тем выше bogo-ops, но при этом увеличивыется вероятность того, что тест сломается. (приведена лучшая попытка)\\
+Еще посмотрим графики \textit{bogo ops}, чтобы проверить наш вывод\\
+\includegraphics[width=\textwidth]{./cache/image/l1cache-sets-bogops.png}
+Видим, что вывод оказался верным, что чем больше set, тем выше bogo-ops, но при этом увеличивыется вероятность того, что тест сломается.
 \subsection{cache-fence}
 Из документации stress-ng:
 \nquote{--cache-fence}{force  write  serialization on each store operation (x86 only). This is a no-op for non-
