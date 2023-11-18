@@ -275,7 +275,9 @@ stress-ng: info:  [3347] load average: 1,09 0,69 0,30
 Повысим приоритет нашего процесса с помощью команды \textit{nice}.\\
 Чтобы была конкуренция за ресурс процессора, мы запустим тест на все ядра (8 ядер)\\
 \includegraphics[width=\textwidth]{image/nice.png}
-Видим, что с увеличением приоритета мы немного выиграли в производительности.
+Напишем скрипт, который протестирует программу с разными \textit{nice}.
+\lstinputlisting[]{cpu/scripts/nice-testing.zsh}
+\includegraphics[width=\textwidth]{cpu/image/nice-testing.png}
 \subsubsection{Команда chrt}
 Попробуем разные политики планирования для наших процессов.\\
 \nquote{RR (Round Robin)}{SCHED\_RR — это алгоритм планирования циклическим перебором. Как только поток исчерпает свой квант времени, он перемещается в конец очереди на выполнение для своего уровня приоритета. Это позволяет запускать другие потоки с таким же приоритетом. Использует класс планирования RT.}
@@ -288,11 +290,14 @@ stress-ng: info:  [3347] load average: 1,09 0,69 0,30
 \includegraphics[width=\textwidth]{image/batch.png}
 \nquote{IDLE:}{SCHED\_IDLE использует класс планирования Idle.}
 \includegraphics[width=\textwidth]{image/idle.png}
-Как мы видим, выбор политики планирования не сильно влияет на производительность нашего теста.
+Напишем скрипт:
+\lstinputlisting[]{cpu/scripts/sched-testing.zsh}
+\includegraphics[width=\textwidth]{cpu/image/sched-tesing.png}
+Как мы видим, выбор политики планирования не сильно влияет на производительность нашего теста. Все значения в рамках погрешности. 
 \subsubsection{Финал}
 Отключаем графический интерфейс и применяем все настройки выше. \\
-\includegraphics[width=\textwidth]{image/cpu-max.png}
-Итого мы с \textbf{417426} bogo ops смогли повысить проиизводительность до \textbf{496438} bogo ops.
+\includegraphics[width=\textwidth]{cpu/image/final-cpu.png}
+Итого мы с \textbf{417426} bogo ops смогли повысить проиизводительность до \textbf{503563} bogo ops.
 \subsection{cdouble}
 Так как \textit{cdouble} тоже вычислительная задача, то попробуем применить все настройки выше.\\
 Но сначала тест без настроек. \\
