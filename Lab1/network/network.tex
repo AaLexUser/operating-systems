@@ -3,9 +3,11 @@
 \subsection{netlink-task}
 \nquote{--netlink-task N}{start  N workers that collect task statistics via the netlink taskstats interface.  This stressor can
 only be run on Linux and requires CAP\_NET\_ADMIN capability.}
+\nquote{netlink}{это специальное семейство адресов сокетов (AF\_NETLINK), п ченных для получения информации о ядре. Процедура использования netlink включает открытие сетевого сокета с семейством адресов AF\_NETLINK и последующее выполнение серии вызовов send(2) и recv(2) для передачи запросов и получения информации в двоичных структурах.}
 Найдем оптимальное количество воркеров:\\
 \includegraphics[width=\textwidth]{./network/image/netlink-task-bogops.png}
 Максимум bogo ops достигается при 3.
+
 \subsection{netdev}
 \nquote{--netdev N}{start N workers that exercise various netdevice ioctl commands across all the available  network  devices.  The ioctls exercised by this stressor are as follows: SIOCGIFCONF, SIOCGIFINDEX, SIOCGIFNAME,
 SIOCGIFFLAGS, SIOCGIFADDR, SIOCGIFNETMASK, SIOCGIFMETRIC, SIOCGIFMTU, SIOCGIFHWADDR,  SIOCGIFMAP  and
@@ -13,4 +15,6 @@ SIOCGIFTXQLEN. See netdevice(7) for more details of these ioctl commands.}
 Найдем оптимальное количество воркеров:\\
 \includegraphics[width=\textwidth]{./network/image/netdev-bogops.png}
 Максимум bogo ops достигается при 8.
+Командой \textit{strace} мы можем посмотреть на команды, которые отправляет netdev сетевым интерфейсам:\\
+\includegraphics[width=\textwidth]{./network/image/netdev-strace.png}
 
