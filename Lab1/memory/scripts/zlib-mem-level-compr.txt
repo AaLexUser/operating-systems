@@ -1,0 +1,10 @@
+zlib;bogo_ops;real_time;usr_time;sys_time;bogo_ops/s_real;bogo_ops/s_user+sys;CPU_used_per
+1;55.62% (1.00 MB/sec)
+2;56.16% (1.28 MB/sec)
+3;54.13% (1.42 MB/sec)
+4;55.54% (1.68 MB/sec)
+5;54.44% (1.96 MB/sec)
+6;53.12% (1.62 MB/sec)
+7;56.27% (2.10 MB/sec)
+8;55.51% (1.85 MB/sec)
+9;56.30% (2.02 MB/sec)

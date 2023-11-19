@@ -1,0 +1,36 @@
+---
+system-info:
+      stress-ng-version: 0.13.12
+      run-by: root
+      date-yyyy-mm-dd: 2023:11:19
+      time-hh-mm-ss: 12:57:44
+      epoch-secs: 1700387864
+      hostname: alexey-ubuntu
+      sysname: Linux
+      nodename: alexey-ubuntu
+      release: 6.2.0-36-generic
+      version: '#37~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Mon Oct  9 15:34:04 UTC 2'
+      machine: x86_64
+      uptime: 14611
+      totalram: 2046705664
+      freeram: 586084352
+      sharedram: 154697728
+      bufferram: 122376192
+      totalswap: 6337589248
+      freeswap: 6119747584
+      pagesize: 4096
+      cpus: 8
+      cpus-online: 8
+      ticks-per-second: 100
+
+metrics:
+    - stressor: zlib
+      bogo-ops: 230
+      bogo-ops-per-second-usr-sys-time: 22.615536
+      bogo-ops-per-second-real-time: 22.727522
+      wall-clock-time: 10.119889
+      user-time: 10.170000
+      system-time: 0.000000
+      cpu-usage-per-instance: 100.495173
+
+...
