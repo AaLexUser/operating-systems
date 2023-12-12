@@ -21,6 +21,7 @@ struct ioctl_arg{
 #define IOC_MAGIC 'a'
 
 #define WR_VALUE _IOW(IOC_MAGIC, 0, struct ioctl_arg)
+#define RD_VALUE _IOR(IOC_MAGIC, 1, struct ioctl_arg)
 
 #define DEVICE_NAME "os_lab"
 
@@ -34,13 +35,15 @@ static ssize_t cs_read(struct file *filp, char __user *buf, size_t len, loff_t *
 static ssize_t cs_write(struct file *filp, const char __user *buf, size_t len, loff_t *off);
 static int cs_open(struct inode *inode, struct file *file);
 static int cs_release(struct inode *inode, struct file *file);
+static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 
 static struct file_operations fops = {
-    .owner      = THIS_MODULE,
-    .read       = cs_read,
-    .write      = cs_write,
-    .open       = cs_open,
-    .release    = cs_release,
+    .owner          = THIS_MODULE,
+    .read           = cs_read,
+    .write          = cs_write,
+    .open           = cs_open,
+    .release        = cs_release,
+    .unlocked_ioctl = cs_ioctl,
 };
 
 static ssize_t cs_read(struct file *filp, char __user *buf, size_t len, loff_t *off){
@@ -62,6 +65,24 @@ static int cs_release(struct inode *inode, struct file *file){
     pr_info("Device closed.\n");
     return 0;
 }
+
+static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
+    int i;
+    switch (cmp) {
+        case WR_VALUE:{
+            break;
+        }
+        case RD_VALUE:{
+            loff_t offset = 0;
+            i = cs_read(file, (char __user*)arg, 99, &offset);
+            put_user('\0', (char __user*)arg + 1);
+            breal
+        }
+    }
+    return 0;
+}
+
+
 
 
 static int __init cpu_stat_init(void){
