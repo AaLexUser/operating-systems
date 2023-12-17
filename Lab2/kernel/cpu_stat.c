@@ -13,6 +13,9 @@
 #include <linux/cpumask.h>
 #include <linux/vmalloc.h>
 #include <linux/tick.h>
+#include <linux/jiffies.h>
+#include <linux/time64.h>
+#include <linux/math64.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Aleksei Lapin");
@@ -47,6 +50,8 @@ static struct cpustat {
 
 #define DEVICE_NAME "os_lab"
 
+
+#define NSEC_TO_SEC(nsec) (nsec) / 1000000000u
 static dev_t major = 0; /* The major number assigned to the device driver */
 static struct class *dev_class;
 static struct cdev cs_dev;
@@ -123,28 +128,13 @@ static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
         }
         case GET_CPU_STAT_ALL:{
             struct cpustat* stat = NULL;
-            u64 buffer_lenght = (get_possible_cpu_num() + 1) * sizeof(struct cpustat);
-            int i;
-            char ch;
-            char __user * tmp = (char __user *) arg;
-
-            /* Define user buffer length */
-            get_user(ch, tmp);
-            for(i = 0; ch && i < buffer_lenght; i++, tmp++){
-                get_user(ch, tmp);
-            }
-            if(i != buffer_lenght -1){
-                pr_err("Buffer to small: gived: %d, requared: %lld", i, buffer_lenght);
-                return 0;
-            }
-            else {
-                stat = get_cpustat_all();
-                if(copy_to_user((struct cpustat*) arg, stat, i)){
-                    pr_err("Fail to copy to user space.");
-                }
-                return 0;
+            u64 buffer_size = (get_possible_cpu_num() + 1) * sizeof(struct cpustat);
+            stat = get_cpustat_all();
+            if(copy_to_user((struct cpustat*) arg, stat, buffer_size)){
+                pr_err("Fail to copy to user space.");
             }
             return 0;
+    
         }
         case SET_CPU: {
             if(copy_from_user(&cpu_num, (struct ioctl_arg*) arg, sizeof(struct ioctl_arg))){
@@ -167,6 +157,22 @@ static u64 get_possible_cpu_num(void){
 static u64 get_online_cpu_num(void){
     u64 cpu_num = num_online_cpus();
     return cpu_num;
+}
+
+u64 cs_nsec_to_clock_t(u64 x)
+{
+#if (NSEC_PER_SEC % USER_HZ) == 0
+	return div_u64(x, NSEC_PER_SEC / USER_HZ);
+#elif (USER_HZ % 512) == 0
+	return div_u64(x * USER_HZ / 512, NSEC_PER_SEC / 512);
+#else
+	/*
+         * max relative error 5.7e-8 (1.8s per year) for USER_HZ <= 1024,
+         * overflow after 64.99 years.
+         * exact for HZ=60, 72, 90, 120, 144, 180, 300, 600, 900, ...
+         */
+	return div_u64(x * 9, (9ull * NSEC_PER_SEC + (USER_HZ / 2)) / USER_HZ);
+#endif
 }
 
 #ifdef arch_idle_time
@@ -233,16 +239,16 @@ static struct cpustat* get_cpustat_by_num(u64 cpu_num){
         pr_err("vmalloc failed.\n");
         return NULL;
     }   
-    stat->user = kcs->cpustat[CPUTIME_USER];
-    stat->nice = kcs->cpustat[CPUTIME_NICE];
-    stat->system = kcs->cpustat[CPUTIME_SYSTEM];
-    stat->idle = cs_get_idle_time(kcs, cpu_num);
-    stat->iowait = cs_get_iowait_time(kcs, cpu_num);
-    stat->irq = kcs->cpustat[CPUTIME_IRQ];
-    stat->softirq = kcs->cpustat[CPUTIME_SOFTIRQ];
-    stat->steal = kcs->cpustat[CPUTIME_STEAL];
-    stat->guest = kcs->cpustat[CPUTIME_GUEST];
-    stat->guest_nice = kcs->cpustat[CPUTIME_GUEST_NICE];
+    stat->user = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_USER]);
+    stat->nice = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_NICE]);
+    stat->system = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_SYSTEM]);
+    stat->idle = cs_nsec_to_clock_t(cs_get_idle_time(kcs, cpu_num));
+    stat->iowait = cs_nsec_to_clock_t(cs_get_iowait_time(kcs, cpu_num));
+    stat->irq = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_IRQ]);
+    stat->softirq = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_SOFTIRQ]);
+    stat->steal = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_STEAL]);
+    stat->guest = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_GUEST]);
+    stat->guest_nice = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_GUEST_NICE]);
     return stat;
 }
 
@@ -256,31 +262,31 @@ static struct cpustat* get_cpustat_all(void){
     } 
     for_each_possible_cpu(i) {
 		struct kernel_cpustat *kcs = &kcpustat_cpu(i);
-		stat_array[0].user += kcs->cpustat[CPUTIME_USER];
-		stat_array[0].nice += kcs->cpustat[CPUTIME_NICE];
-		stat_array[0].system += kcs->cpustat[CPUTIME_SYSTEM];
-		stat_array[0].idle += cs_get_idle_time(kcs, cpu_num);
-		stat_array[0].iowait += cs_get_iowait_time(kcs, cpu_num);
-		stat_array[0].irq += kcs->cpustat[CPUTIME_IRQ];
-		stat_array[0].softirq += kcs->cpustat[CPUTIME_SOFTIRQ];
-		stat_array[0].steal += kcs->cpustat[CPUTIME_STEAL];
-		stat_array[0].guest += kcs->cpustat[CPUTIME_GUEST];
-		stat_array[0].guest_nice += kcs->cpustat[CPUTIME_GUEST_NICE];
+		stat_array[0].user += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_USER]);
+		stat_array[0].nice += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_NICE]);
+		stat_array[0].system += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_SYSTEM]);
+		stat_array[0].idle += cs_nsec_to_clock_t(cs_get_idle_time(kcs, cpu_num));
+		stat_array[0].iowait += cs_nsec_to_clock_t(cs_get_iowait_time(kcs, cpu_num));
+		stat_array[0].irq += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_IRQ]);
+		stat_array[0].softirq += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_SOFTIRQ]);
+		stat_array[0].steal += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_STEAL]);
+		stat_array[0].guest += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_GUEST]);
+		stat_array[0].guest_nice += cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_GUEST_NICE]);
     }
     
     for_each_online_cpu(i) {
 
         struct kernel_cpustat *kcs = &kcpustat_cpu(i);
-        stat_array[i].user = kcs->cpustat[CPUTIME_USER];
-        stat_array[i].nice = kcs->cpustat[CPUTIME_NICE];
-        stat_array[i].system = kcs->cpustat[CPUTIME_SYSTEM];
-        stat_array[i].idle = cs_get_idle_time(kcs, i);
-        stat_array[i].iowait = cs_get_iowait_time(kcs, i);
-        stat_array[i].irq = kcs->cpustat[CPUTIME_IRQ];
-        stat_array[i].softirq = kcs->cpustat[CPUTIME_SOFTIRQ];
-        stat_array[i].steal = kcs->cpustat[CPUTIME_STEAL];
-        stat_array[i].guest = kcs->cpustat[CPUTIME_GUEST];
-        stat_array[i].guest_nice = kcs->cpustat[CPUTIME_GUEST_NICE];
+        stat_array[i+1].user = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_USER]);
+        stat_array[i+1].nice = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_NICE]);
+        stat_array[i+1].system = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_SYSTEM]);
+        stat_array[i+1].idle = cs_nsec_to_clock_t(cs_get_idle_time(kcs, i));
+        stat_array[i+1].iowait = cs_nsec_to_clock_t(cs_get_iowait_time(kcs, i));
+        stat_array[i+1].irq = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_IRQ]);
+        stat_array[i+1].softirq = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_SOFTIRQ]);
+        stat_array[i+1].steal = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_STEAL]);
+        stat_array[i+1].guest = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_GUEST]);
+        stat_array[i+1].guest_nice = cs_nsec_to_clock_t(kcs->cpustat[CPUTIME_GUEST_NICE]);
     }
     return stat_array;
 }

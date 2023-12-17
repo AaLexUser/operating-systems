@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define IOC_MAGIC 'a'
 
@@ -33,7 +35,129 @@ struct cpustat {
     uint64_t guest_nice;
 };
 
+struct cpu_percent_stat {
+    double user;
+    double nice;
+    double system;
+    double idle;
+    double iowait;
+    double irq;
+    double softirq;
+    double steal;
+    double guest;
+    double guest_nice;
+};
+
+
 uint64_t possible_cpu = 0;
+
+
+unsigned long long get_global_cpu_mpstats(struct cpustat* cpus_stat, uint64_t possible_cpus){
+    unsigned long long tot_jiffies = 0;
+    tot_jiffies = cpus_stat[0].user + cpus_stat[0].nice + cpus_stat[0].system 
+        + cpus_stat[0].idle + cpus_stat[0].iowait + cpus_stat[0].irq + cpus_stat[0].softirq 
+        + cpus_stat[0].steal;
+    return tot_jiffies;
+
+}
+
+struct cpu_percent_stat* get_percentage_stat(struct cpustat* cpus_stat, uint64_t possible_cpus, unsigned long long tot_jiffies){
+    struct cpu_percent_stat* new_stat = malloc((possible_cpus + 1) * sizeof(struct cpu_percent_stat));
+    if(!new_stat){
+        printf("New cpu stat is NULL");
+        return NULL;
+    }
+    for(int i = 0; i < possible_cpus + 1; i++){
+        new_stat[i].user = (double)(cpus_stat[i].user * 100) / tot_jiffies;
+        new_stat[i].system = (double)(cpus_stat[i].system * 100) / tot_jiffies;
+        new_stat[i].nice = (double)(cpus_stat[i].nice * 100) / tot_jiffies;
+        new_stat[i].idle = (double)(cpus_stat[i].idle * 100) / tot_jiffies;
+        new_stat[i].iowait = (double)(cpus_stat[i].iowait * 100) / tot_jiffies;
+        new_stat[i].irq = (double)(cpus_stat[i].irq * 100) / tot_jiffies;
+        new_stat[i].softirq = (double)(cpus_stat[i].softirq * 100) / tot_jiffies;
+        new_stat[i].steal = (double)(cpus_stat[i].steal * 100) / tot_jiffies;
+        new_stat[i].guest = (double)(cpus_stat[i].guest * 100) / tot_jiffies;
+        new_stat[i].guest_nice = (double)(cpus_stat[i].guest_nice * 100) / tot_jiffies;
+    }
+    return new_stat;
+}
+
+void get_current_time(char* time_str){
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    sprintf(time_str, "%02d:%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+}
+
+void write_cpu_percent_stat(struct cpu_percent_stat* cpus_stat, uint64_t possible_cpus){
+    char time_str[10];
+    get_current_time(time_str);
+    printf("%s\t", time_str);
+
+    printf("CPU\t%%usr\t%%nice\t%%sys\t%%iowait\t%%irq "
+		       "\t%%soft\t%%steal\t%%guest\t%%gnice\t%%idle\n");
+    for(int i = 0; i < possible_cpus + 1; i++){
+        get_current_time(time_str);
+        printf("%s\t", time_str);
+
+        if(i == 0){
+            printf("all\t");
+        }
+        else printf("%d\t", (i - 1));
+
+        printf("%.2f\t%.2f\t%.2f\t%.2f\t%.2f"
+        "    %.2f\t%.2f\t%.2f\t%.2f\t%.2f\n",
+            cpus_stat[i].user,
+            cpus_stat[i].nice,
+            cpus_stat[i].system,
+            cpus_stat[i].iowait,
+            cpus_stat[i].irq,
+            cpus_stat[i].softirq,
+            cpus_stat[i].steal,
+            cpus_stat[i].guest,
+            cpus_stat[i].guest_nice,
+            cpus_stat[i].idle
+        );
+    }
+}
+
+
+void write_cpu_stat(struct cpustat* cpus_stat, uint64_t possible_cpus){
+    char time_str[10];
+    get_current_time(time_str);
+    printf("%s\t", time_str);
+
+    
+    
+    printf("CPU\t%%usr   %%nice    %%sys %%iowait  %%irq "
+		       "%%soft  %%steal  %%guest  %%gnice   %%idle\n");
+    for(int i = 0; i < possible_cpus + 1; i++){
+        get_current_time(time_str);
+        printf("%s\t", time_str);
+        if(i == 0){
+            printf("all\t");
+        }
+        else printf("%d\t", (i - 1));
+
+        printf("%"PRIu64"\t%"PRIu64"\t%"PRIu64"\t%"PRIu64"\t%"PRIu64""
+        "    %"PRIu64"\t\t%"PRIu64"\t%"PRIu64"\t%"PRIu64"\t%"PRIu64"\n",
+            cpus_stat[i].user,
+            cpus_stat[i].nice,
+            cpus_stat[i].system,
+            cpus_stat[i].iowait,
+            cpus_stat[i].irq,
+            cpus_stat[i].softirq,
+            cpus_stat[i].steal,
+            cpus_stat[i].guest,
+            cpus_stat[i].guest_nice,
+            cpus_stat[i].idle
+        );
+    }
+}
+
 
 int main(int argc, char *argv[]){
     int driver = open(DEVICE_PATH, O_RDWR);
@@ -50,7 +174,10 @@ int main(int argc, char *argv[]){
         return -1;
     }
     ioctl(driver, GET_CPU_STAT_ALL, cpus_stat);
-    printf("Total user stat: %"PRIu64"\n", cpus_stat[0].user);
+    unsigned long long tot_jiffies = get_global_cpu_mpstats(cpus_stat, possible_cpu);
+    printf("global tot_jiffies %llu\n", tot_jiffies);
+    struct cpu_percent_stat* cpus_percent_stat = get_percentage_stat(cpus_stat, possible_cpu, tot_jiffies);
+    write_cpu_percent_stat(cpus_percent_stat, possible_cpu);
     close(driver);
     return 0;
 }
