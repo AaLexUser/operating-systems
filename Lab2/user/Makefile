@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall
-RM=rm
-LD=ld
+RM = rm
+LD = ld
 TARGET = my_mpstat
 
 .PHONY: clean all run
@@ -9,8 +9,14 @@ TARGET = my_mpstat
 all: $(TARGET)
 run: clean all
 
-$(TARGET): my_mpstat.c
-	$(CC) $(CFLAGS) -o $(TARGET) my_mpstat.c
+$(TARGET): common.o my_mpstat.o
+	$(CC) -o $(TARGET) common.o my_mpstat.o
 
+common.o: common.c
+	$(CC) $(CFLAGS) -c common.c
+
+my_mpstat.o: my_mpstat.c
+	$(CC) $(CFLAGS) -c my_mpstat.c
 clean:
-	$(RM) -f $(TARGET)
+	$(RM) -f $(TARGET) common.o my_mpstat.o
+	
