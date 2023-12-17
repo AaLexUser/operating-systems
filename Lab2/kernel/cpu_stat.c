@@ -11,13 +11,15 @@
 #include <linux/kernel_stat.h>
 #include <linux/types.h> /* u64 */
 #include <linux/cpumask.h>
+#include <linux/vmalloc.h>
+#include <linux/tick.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Aleksei Lapin");
 MODULE_DESCRIPTION("Simple module to start");
 
 struct ioctl_arg{
-    unsigned int val;
+    u64 val;
 };
 
 static struct cpustat {
@@ -38,8 +40,10 @@ static struct cpustat {
 
 #define WR_VALUE _IOW(IOC_MAGIC, 0, struct ioctl_arg)
 #define SET_CPU _IOW(IOC_MAGIC, 1, struct ioctl_arg)
-#define GET_CPU_STAT _IOR(IOC_MAGIC, 2, struct cpustat)
-#define GET_CPU_NUM _IOR(IOC_MAGIC, 3, struct ioctl_arg)
+#define GET_CPU_STAT_BY_NUM _IOR(IOC_MAGIC, 2, struct cpustat)
+#define GET_ONLINE_CPU_NUM _IOR(IOC_MAGIC, 3, struct ioctl_arg)
+#define GET_POSSIBLE_CPU_NUM _IOR(IOC_MAGIC, 4, struct ioctl_arg)
+#define GET_CPU_STAT_ALL _IOR(IOC_MAGIC, 5, struct cpustat*)
 
 #define DEVICE_NAME "os_lab"
 
@@ -56,8 +60,10 @@ static ssize_t cs_write(struct file *filp, const char __user *buf, size_t len, l
 static int cs_open(struct inode *inode, struct file *file);
 static int cs_release(struct inode *inode, struct file *file);
 static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
-static u64 get_cpu_num(void);
-static int get_stat(void);
+static u64 get_possible_cpu_num(void);
+static u64 get_online_cpu_num(void);
+static struct cpustat* get_cpustat_by_num(u64 cpu_num);
+static struct cpustat* get_cpustat_all(void);
 
 
 
@@ -93,18 +99,50 @@ static int cs_release(struct inode *inode, struct file *file){
 static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
     struct ioctl_arg cpu_num;
     switch (cmd) {
-        case GET_CPU_NUM:{
-            cpu_num.val = get_cpu_num();
+        case GET_ONLINE_CPU_NUM:{
+            cpu_num.val = get_online_cpu_num();
             if(copy_to_user((struct ioctl_arg*) arg, &cpu_num, sizeof(struct ioctl_arg))){
                 pr_err("Fail to copy to user space.");
             }
             return 0;
         }
-        case GET_CPU_STAT:{
-            struct cpustat* stat;
-            stat = get_stat(cpu);
-            if(copy_to_user((struct cpustat*) arg, &stat, sizeof(struct stat))){
+        case GET_POSSIBLE_CPU_NUM: {
+            cpu_num.val = get_possible_cpu_num();
+            if(copy_to_user((struct ioctl_arg*) arg, &cpu_num, sizeof(struct ioctl_arg))){
                 pr_err("Fail to copy to user space.");
+            }
+            return 0;
+        }
+        case GET_CPU_STAT_BY_NUM:{
+            struct cpustat* stat = NULL;
+            stat = get_cpustat_by_num(cpu);
+            if(copy_to_user((struct cpustat*) arg, stat, sizeof(struct cpustat))){
+                pr_err("Fail to copy to user space.");
+            }
+            return 0;
+        }
+        case GET_CPU_STAT_ALL:{
+            struct cpustat* stat = NULL;
+            u64 buffer_lenght = (get_possible_cpu_num() + 1) * sizeof(struct cpustat);
+            int i;
+            char ch;
+            char __user * tmp = (char __user *) arg;
+
+            /* Define user buffer length */
+            get_user(ch, tmp);
+            for(i = 0; ch && i < buffer_lenght; i++, tmp++){
+                get_user(ch, tmp);
+            }
+            if(i != buffer_lenght -1){
+                pr_err("Buffer to small: gived: %d, requared: %lld", i, buffer_lenght);
+                return 0;
+            }
+            else {
+                stat = get_cpustat_all();
+                if(copy_to_user((struct cpustat*) arg, stat, i)){
+                    pr_err("Fail to copy to user space.");
+                }
+                return 0;
             }
             return 0;
         }
@@ -112,6 +150,7 @@ static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
             if(copy_from_user(&cpu_num, (struct ioctl_arg*) arg, sizeof(struct ioctl_arg))){
                 pr_err("Fail to copy to kernel space.");
             }
+            cpu = cpu_num.val;
             return 0;
         }
         default:
@@ -120,49 +159,130 @@ static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
     return 0;
 }
 
-static u64 get_cpu_num(void){
+static u64 get_possible_cpu_num(void){
+    u64 cpu_num = num_present_cpus();
+    return cpu_num;
+}
+
+static u64 get_online_cpu_num(void){
     u64 cpu_num = num_online_cpus();
     return cpu_num;
 }
 
-static struct cpustat get_cpustat(u64 cpu_num){
-    struct kernel_cpustat *kcs = &kcpustat_cpu(i);
-    struct cpustat stat= vmalloc(sizeof(struct cpustat));
-    stat.user = kcs->cpustat[CPUTIME_USER];
-    stat.nice = kcs->cpustat[CPUTIME_NICE];
-    stat.system = kcs->cpustat[CPUTIME_SYSTEM];
-    stat.idle = get_idle_time(kcs, i);
-    stat.iowait = get_iowait_time(kcs, i);
-    stat.irq = kcs->cpustat[CPUTIME_IRQ];
-    stat.softirq = kcs->cpustat[CPUTIME_SOFTIRQ];
-    stat.steal = kcs->cpustat[CPUTIME_STEAL];
-    stat.guest = kcs->cpustat[CPUTIME_GUEST];
-    stat.guest_nice = kcs->cpustat[CPUTIME_GUEST_NICE];
+#ifdef arch_idle_time
+static u64 cs_get_idle_time(struct kernel_cpustat *kcs, int cpu)
+{
+	u64 idle;
+
+	idle = kcs->cpustat[CPUTIME_IDLE];
+	if (cpu_online(cpu) && !nr_iowait_cpu(cpu))
+		idle += arch_idle_time(cpu);
+	return idle;
+}
+
+static u64 cs_get_iowait_time(struct kernel_cpustat *kcs, int cpu)
+{
+	u64 iowait;
+
+	iowait = kcs->cpustat[CPUTIME_IOWAIT];
+	if (cpu_online(cpu) && nr_iowait_cpu(cpu))
+		iowait += arch_idle_time(cpu);
+	return iowait;
+}
+
+#else
+
+static u64 cs_get_idle_time(struct kernel_cpustat *kcs, int cpu)
+{
+	u64 idle, idle_usecs = -1ULL;
+
+	if (cpu_online(cpu))
+		idle_usecs = get_cpu_idle_time_us(cpu, NULL);
+
+	if (idle_usecs == -1ULL)
+		/* !NO_HZ or cpu offline so we can rely on cpustat.idle */
+		idle = kcs->cpustat[CPUTIME_IDLE];
+	else
+		idle = idle_usecs * NSEC_PER_USEC;
+
+	return idle;
+}
+
+static u64 cs_get_iowait_time(struct kernel_cpustat *kcs, int cpu)
+{
+	u64 iowait, iowait_usecs = -1ULL;
+
+	if (cpu_online(cpu))
+		iowait_usecs = get_cpu_iowait_time_us(cpu, NULL);
+
+	if (iowait_usecs == -1ULL)
+		/* !NO_HZ or cpu offline so we can rely on cpustat.iowait */
+		iowait = kcs->cpustat[CPUTIME_IOWAIT];
+	else
+		iowait = iowait_usecs * NSEC_PER_USEC;
+
+	return iowait;
+}
+
+#endif 
+
+static struct cpustat* get_cpustat_by_num(u64 cpu_num){
+    struct kernel_cpustat *kcs = &kcpustat_cpu(cpu_num);
+    struct cpustat* stat = vmalloc(sizeof(struct cpustat));
+    if (!stat) {
+        pr_err("vmalloc failed.\n");
+        return NULL;
+    }   
+    stat->user = kcs->cpustat[CPUTIME_USER];
+    stat->nice = kcs->cpustat[CPUTIME_NICE];
+    stat->system = kcs->cpustat[CPUTIME_SYSTEM];
+    stat->idle = cs_get_idle_time(kcs, cpu_num);
+    stat->iowait = cs_get_iowait_time(kcs, cpu_num);
+    stat->irq = kcs->cpustat[CPUTIME_IRQ];
+    stat->softirq = kcs->cpustat[CPUTIME_SOFTIRQ];
+    stat->steal = kcs->cpustat[CPUTIME_STEAL];
+    stat->guest = kcs->cpustat[CPUTIME_GUEST];
+    stat->guest_nice = kcs->cpustat[CPUTIME_GUEST_NICE];
     return stat;
 }
 
-static int get_stat(int cpu_num){
+static struct cpustat* get_cpustat_all(void){
     int i = 0;
-
-    u64 user, nice, system, idle, iowait, irq, softirq, steal;
-    u64 guest, guest_nice;
-
-    for_each_online_cpu(cpu) {
+    u64 cpu_num = get_online_cpu_num() + 1;
+    struct cpustat* stat_array = vmalloc(cpu_num * sizeof(struct cpustat));
+    if (!stat_array) {
+        pr_err("vmalloc failed.\n");
+        return NULL;
+    } 
+    for_each_possible_cpu(i) {
+		struct kernel_cpustat *kcs = &kcpustat_cpu(i);
+		stat_array[0].user += kcs->cpustat[CPUTIME_USER];
+		stat_array[0].nice += kcs->cpustat[CPUTIME_NICE];
+		stat_array[0].system += kcs->cpustat[CPUTIME_SYSTEM];
+		stat_array[0].idle += cs_get_idle_time(kcs, cpu_num);
+		stat_array[0].iowait += cs_get_iowait_time(kcs, cpu_num);
+		stat_array[0].irq += kcs->cpustat[CPUTIME_IRQ];
+		stat_array[0].softirq += kcs->cpustat[CPUTIME_SOFTIRQ];
+		stat_array[0].steal += kcs->cpustat[CPUTIME_STEAL];
+		stat_array[0].guest += kcs->cpustat[CPUTIME_GUEST];
+		stat_array[0].guest_nice += kcs->cpustat[CPUTIME_GUEST_NICE];
+    }
+    
+    for_each_online_cpu(i) {
 
         struct kernel_cpustat *kcs = &kcpustat_cpu(i);
-        user = kcs->cpustat[CPUTIME_USER];
-        nice = kcs->cpustat[CPUTIME_NICE];
-        system = kcs->cpustat[CPUTIME_SYSTEM];
-        idle = get_idle_time(kcs, i);
-        iowait = get_iowait_time(kcs, i);
-        irq = kcs->cpustat[CPUTIME_IRQ];
-        softirq = kcs->cpustat[CPUTIME_SOFTIRQ];
-        steal = kcs->cpustat[CPUTIME_STEAL];
-        guest = kcs->cpustat[CPUTIME_GUEST];
-        guest_nice = kcs->cpustat[CPUTIME_GUEST_NICE];
-
+        stat_array[i].user = kcs->cpustat[CPUTIME_USER];
+        stat_array[i].nice = kcs->cpustat[CPUTIME_NICE];
+        stat_array[i].system = kcs->cpustat[CPUTIME_SYSTEM];
+        stat_array[i].idle = cs_get_idle_time(kcs, i);
+        stat_array[i].iowait = cs_get_iowait_time(kcs, i);
+        stat_array[i].irq = kcs->cpustat[CPUTIME_IRQ];
+        stat_array[i].softirq = kcs->cpustat[CPUTIME_SOFTIRQ];
+        stat_array[i].steal = kcs->cpustat[CPUTIME_STEAL];
+        stat_array[i].guest = kcs->cpustat[CPUTIME_GUEST];
+        stat_array[i].guest_nice = kcs->cpustat[CPUTIME_GUEST_NICE];
     }
-    return 0;
+    return stat_array;
 }
 
 
