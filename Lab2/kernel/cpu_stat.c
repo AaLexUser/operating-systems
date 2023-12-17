@@ -16,6 +16,7 @@
 #include <linux/jiffies.h>
 #include <linux/time64.h>
 #include <linux/math64.h>
+#include <linux/utsname.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Aleksei Lapin");
@@ -38,10 +39,19 @@ static struct cpustat {
     u64 guest_nice;
 };
 
+struct os_stat{
+    char sysname[__NEW_UTS_LEN + 1];
+	char nodename[__NEW_UTS_LEN + 1];
+	char release[__NEW_UTS_LEN + 1];
+	char version[__NEW_UTS_LEN + 1];
+	char machine[__NEW_UTS_LEN + 1];
+	char domainname[__NEW_UTS_LEN + 1];
+};
+
 /* Documentation/ioctl/ioctl-number.txt */
 #define IOC_MAGIC 'a'
 
-#define WR_VALUE _IOW(IOC_MAGIC, 0, struct ioctl_arg)
+#define GET_OS_STAT _IOR(IOC_MAGIC, 0, struct os_stat)
 #define SET_CPU _IOW(IOC_MAGIC, 1, struct ioctl_arg)
 #define GET_CPU_STAT_BY_NUM _IOR(IOC_MAGIC, 2, struct cpustat)
 #define GET_ONLINE_CPU_NUM _IOR(IOC_MAGIC, 3, struct ioctl_arg)
@@ -135,6 +145,20 @@ static long cs_ioctl(struct file *file, unsigned int cmd, unsigned long arg){
             }
             return 0;
     
+        }
+        case GET_OS_STAT: {
+            struct os_stat os_stat;
+            struct new_utsname *nutsname = utsname();
+            strcpy(os_stat.sysname, nutsname->sysname);
+            strcpy(os_stat.nodename, nutsname->nodename);
+            strcpy(os_stat.release, nutsname->release);
+            strcpy(os_stat.version, nutsname->version);
+            strcpy(os_stat.machine, nutsname->machine);
+            strcpy(os_stat.domainname, nutsname->domainname);
+            if(copy_to_user((struct os_stat*) arg, &os_stat, sizeof(struct os_stat))){
+                pr_err("Fail to copy to user space.");
+            }
+            return 0;
         }
         case SET_CPU: {
             if(copy_from_user(&cpu_num, (struct ioctl_arg*) arg, sizeof(struct ioctl_arg))){

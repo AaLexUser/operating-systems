@@ -8,7 +8,7 @@
 
 #define IOC_MAGIC 'a'
 
-#define WR_VALUE _IOW(IOC_MAGIC, 0, struct ioctl_arg)
+#define GET_OS_STAT _IOR(IOC_MAGIC, 0, struct os_stat)
 #define SET_CPU _IOW(IOC_MAGIC, 1, struct ioctl_arg)
 #define GET_CPU_STAT_BY_NUM _IOR(IOC_MAGIC, 2, struct cpustat)
 #define GET_ONLINE_CPU_NUM _IOR(IOC_MAGIC, 3, struct ioctl_arg)
@@ -46,6 +46,17 @@ struct cpu_percent_stat {
     double steal;
     double guest;
     double guest_nice;
+};
+
+#define __NEW_UTS_LEN 64
+
+struct os_stat{
+    char sysname[__NEW_UTS_LEN + 1];
+	char nodename[__NEW_UTS_LEN + 1];
+	char release[__NEW_UTS_LEN + 1];
+	char version[__NEW_UTS_LEN + 1];
+	char machine[__NEW_UTS_LEN + 1];
+	char domainname[__NEW_UTS_LEN + 1];
 };
 
 
@@ -90,6 +101,32 @@ void get_current_time(char* time_str){
     timeinfo = localtime(&rawtime);
 
     sprintf(time_str, "%02d:%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+}
+
+void get_current_date(char* date_str){
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    sprintf(date_str, "%02d.%02d.%04d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
+}
+
+void write_os_stat(struct os_stat* os_stat){
+    printf("OS Information:\n");
+    printf("sysname: %s\n", os_stat->sysname);
+    printf("nodename: %s\n", os_stat->nodename);
+    printf("release: %s\n", os_stat->release);
+    printf("version: %s\n", os_stat->version);
+    printf("machine: %s\n", os_stat->machine);
+    printf("domainname: %s\n", os_stat->domainname);
+};
+
+void write_header(struct os_stat* os_stat, uint64_t possible_cpus){
+    char date_str[10];
+    get_current_date(date_str);
+    printf("%s %s (%s)  %s      _%s_        (%"PRIu64" CPU)\n", os_stat->sysname, os_stat->release, os_stat->nodename, date_str,  os_stat->machine, possible_cpus);
 }
 
 void write_cpu_percent_stat(struct cpu_percent_stat* cpus_stat, uint64_t possible_cpus){
@@ -173,11 +210,16 @@ int main(int argc, char *argv[]){
         printf("CPUS_STAT is NULL");
         return -1;
     }
+    struct os_stat* os_stat = malloc(sizeof(struct os_stat));
+    ioctl(driver, GET_OS_STAT, os_stat);
+    write_header(os_stat, possible_cpu);
     ioctl(driver, GET_CPU_STAT_ALL, cpus_stat);
     unsigned long long tot_jiffies = get_global_cpu_mpstats(cpus_stat, possible_cpu);
-    printf("global tot_jiffies %llu\n", tot_jiffies);
     struct cpu_percent_stat* cpus_percent_stat = get_percentage_stat(cpus_stat, possible_cpu, tot_jiffies);
     write_cpu_percent_stat(cpus_percent_stat, possible_cpu);
+    free(cpus_percent_stat);
+    free(cpus_stat);
+    free(os_stat);
     close(driver);
     return 0;
 }
