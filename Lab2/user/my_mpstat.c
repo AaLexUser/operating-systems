@@ -77,7 +77,7 @@ unsigned int opt_flags = 0;
 
 void usage(char *progname)
 {
-	fprintf(stderr, "Usage: %s [ options ]\n",
+	fprintf(stderr, "Usage: %s [ options ][ <interval> [ <count> ] ]\n",
 		progname);
 
 	fprintf(stderr, "Options are:\n"
