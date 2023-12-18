@@ -207,7 +207,7 @@ void write_cpu_stat(struct cpustat* cpus_stat, uint64_t possible_cpus){
     }
 }
 
-struct cpustat* cpu_diff(struct cpustat* cpu_prev, struct cpustat* cpu_current){
+struct cpustat* cpu_diff(struct cpustat* cpu_prev, struct cpustat* cpu_current, uint64_t possible_cpu){
     struct cpustat* cpu_diff = malloc((possible_cpu + 1) * sizeof(struct cpustat));
     if(!cpu_diff){
         printf("Unable to malloc cpu_diff");
@@ -230,24 +230,34 @@ struct cpustat* cpu_diff(struct cpustat* cpu_prev, struct cpustat* cpu_current){
 
 
 
-int loop(int driver, int interval, int count, struct cpustat* cpus_stat_p, struct cpustat* cpus_stat_c){
+int loop(int driver, int interval, int count, uint64_t possible_cpu){
+    struct cpustat* cpus_stat_p = malloc((possible_cpu + 1) * sizeof(struct cpustat));
+    if(cpus_stat_p == NULL){
+        printf("CPUS_STAT is NULL");
+        return -1;
+    }
+    struct cpustat* cpus_stat_c = malloc((possible_cpu + 1) * sizeof(struct cpustat));
+    if(cpus_stat_c == NULL){
+        printf("CPUS_STAT is NULL");
+        return -1;
+    }
     struct os_stat* os_stat = malloc(sizeof(struct os_stat));
     ioctl(driver, GET_OS_STAT, os_stat);
     write_header(os_stat, possible_cpu);
-    int i = 0;
+    int i = -1;
+    ioctl(driver, GET_CPU_STAT_ALL, cpus_stat_p);
     while(1){
-        ioctl(driver, GET_CPU_STAT_ALL, cpus_stat_p);
-        printf("1");
         if(++i == count) break;
         sleep(interval);
         ioctl(driver, GET_CPU_STAT_ALL, cpus_stat_c);
-        struct cpustat* diff_stat = cpu_diff(cpus_stat_p, cpus_stat_c);
+        struct cpustat* diff_stat = cpu_diff(cpus_stat_p, cpus_stat_c, possible_cpu);
         unsigned long long* tot_jiffies = get_global_cpu_mpstats(diff_stat, possible_cpu);
         struct cpu_percent_stat* cpus_percent_stat = get_percentage_stat(diff_stat, possible_cpu, tot_jiffies);
         write_cpu_percent_stat(cpus_percent_stat, possible_cpu);
         free(diff_stat);
         free(tot_jiffies);
         free(cpus_percent_stat);
+        memcpy(cpus_stat_p, cpus_stat_c, (possible_cpu + 1) * sizeof(struct cpustat));
     }
     free(cpus_stat_c);
     free(cpus_stat_p);
@@ -297,29 +307,26 @@ int main(int argc, char *argv[]){
                     usage(argv[0]);
                 }
             interval = atoi(argv[opt]);
-            printf("Interval: %d\n", interval);
             if (interval < 0) {
                 usage(argv[0]);
             }
             opt_flags |= F_OPT_INTERVAL;
         }
+        else if(count < 0){
+            if (strspn(argv[opt], "0123456789") != strlen(argv[opt]) || !interval) {
+                    usage(argv[0]);
+                }
+            count = atoi(argv[opt]);
+            if (count < 1) {
+                usage(argv[0]);
+            }
+        }
     }
     if(!(opt_flags & F_OPT_P)){
         cpu_mask[0] = 1;
     }
-    if((opt_flags & F_OPT_INTERVAL)){
-        struct cpustat* cpus_stat_p = malloc((possible_cpu + 1) * sizeof(struct cpustat));
-        if(cpus_stat_p == NULL){
-            printf("CPUS_STAT is NULL");
-            return -1;
-        }
-        struct cpustat* cpus_stat_c = malloc((possible_cpu + 1) * sizeof(struct cpustat));
-        if(cpus_stat_c == NULL){
-            printf("CPUS_STAT is NULL");
-            return -1;
-        }
-        loop(driver, interval, count, cpus_stat_p, cpus_stat_c);
-        return 0;
+    if(interval > 0 && (count > 0 || count == -1)){
+        loop(driver, interval, count, possible_cpu);
     }
     else{
         struct cpustat* cpus_stat = malloc((possible_cpu + 1) * sizeof(struct cpustat));
