@@ -20,6 +20,9 @@
 
 
 #define DEVICE_PATH "/dev/os_lab"
+#define F_OPT_P 0x01
+#define F_OPT_INTERVAL 0x02
+
 
 struct ioctl_arg{
     uint64_t val;
@@ -67,13 +70,14 @@ struct os_stat{
 
 uint64_t possible_cpu = 0;
 uint8_t* cpu_mask = NULL;
+unsigned int opt_flags = 0;
 
 #define KEY_all "all"
 
 
 void usage(char *progname)
 {
-	fprintf(stderr, "Usage: %s [ options ] [ <interval> [ <count> ] ]\n",
+	fprintf(stderr, "Usage: %s [ options ]\n",
 		progname);
 
 	fprintf(stderr, "Options are:\n"
@@ -203,6 +207,55 @@ void write_cpu_stat(struct cpustat* cpus_stat, uint64_t possible_cpus){
     }
 }
 
+struct cpustat* cpu_diff(struct cpustat* cpu_prev, struct cpustat* cpu_current){
+    struct cpustat* cpu_diff = malloc((possible_cpu + 1) * sizeof(struct cpustat));
+    if(!cpu_diff){
+        printf("Unable to malloc cpu_diff");
+        return NULL;
+    }
+    for(int i = 0; i < possible_cpu + 1; i++){
+        cpu_diff[i].user = cpu_current[i].user - cpu_prev[i].user;
+        cpu_diff[i].nice = cpu_current[i].nice - cpu_prev[i].nice;
+        cpu_diff[i].system = cpu_current[i].system - cpu_prev[i].system;
+        cpu_diff[i].idle = cpu_current[i].idle - cpu_prev[i].idle;
+        cpu_diff[i].iowait = cpu_current[i].iowait - cpu_prev[i].iowait;
+        cpu_diff[i].irq = cpu_current[i].irq - cpu_prev[i].irq;
+        cpu_diff[i].softirq = cpu_current[i].softirq - cpu_prev[i].softirq;
+        cpu_diff[i].steal = cpu_current[i].steal - cpu_prev[i].steal;
+        cpu_diff[i].guest = cpu_current[i].guest - cpu_prev[i].guest;
+        cpu_diff[i].guest_nice = cpu_current[i].guest_nice - cpu_prev[i].guest_nice;
+    }
+    return cpu_diff;
+}
+
+
+
+int loop(int driver, int interval, int count, struct cpustat* cpus_stat_p, struct cpustat* cpus_stat_c){
+    struct os_stat* os_stat = malloc(sizeof(struct os_stat));
+    ioctl(driver, GET_OS_STAT, os_stat);
+    write_header(os_stat, possible_cpu);
+    int i = 0;
+    while(1){
+        ioctl(driver, GET_CPU_STAT_ALL, cpus_stat_p);
+        printf("1");
+        if(++i == count) break;
+        sleep(interval);
+        ioctl(driver, GET_CPU_STAT_ALL, cpus_stat_c);
+        struct cpustat* diff_stat = cpu_diff(cpus_stat_p, cpus_stat_c);
+        unsigned long long* tot_jiffies = get_global_cpu_mpstats(diff_stat, possible_cpu);
+        struct cpu_percent_stat* cpus_percent_stat = get_percentage_stat(diff_stat, possible_cpu, tot_jiffies);
+        write_cpu_percent_stat(cpus_percent_stat, possible_cpu);
+        free(diff_stat);
+        free(tot_jiffies);
+        free(cpus_percent_stat);
+    }
+    free(cpus_stat_c);
+    free(cpus_stat_p);
+    free(os_stat);
+    close(driver);
+    return 0;
+}
+
 
 int main(int argc, char *argv[]){
     int driver = open(DEVICE_PATH, O_RDWR);
@@ -218,6 +271,8 @@ int main(int argc, char *argv[]){
     uint64_t possible_cpu = umsg.val;
 
     int opt = 0;
+    int interval = -1;
+    int count = -1;
     cpu_mask = malloc((possible_cpu + 1));
     if(!cpu_mask){
         printf("Fail to malloc cpu_mask");
@@ -234,25 +289,56 @@ int main(int argc, char *argv[]){
                 printf("Fail to parse cpu mask");
                 return -1;
             }
+            opt_flags |= F_OPT_P;
+        }
+        
+        else if(interval < 0){
+            if (strspn(argv[opt], "0123456789") != strlen(argv[opt])) {
+                    usage(argv[0]);
+                }
+            interval = atoi(argv[opt]);
+            printf("Interval: %d\n", interval);
+            if (interval < 0) {
+                usage(argv[0]);
+            }
+            opt_flags |= F_OPT_INTERVAL;
         }
     }
-
-    struct cpustat* cpus_stat = malloc((possible_cpu + 1) * sizeof(struct cpustat));
-    if(cpus_stat == NULL){
-        printf("CPUS_STAT is NULL");
-        return -1;
+    if(!(opt_flags & F_OPT_P)){
+        cpu_mask[0] = 1;
     }
-    struct os_stat* os_stat = malloc(sizeof(struct os_stat));
-    ioctl(driver, GET_OS_STAT, os_stat);
-    write_header(os_stat, possible_cpu);
-    ioctl(driver, GET_CPU_STAT_ALL, cpus_stat);
-    unsigned long long* tot_jiffies = get_global_cpu_mpstats(cpus_stat, possible_cpu);
-    struct cpu_percent_stat* cpus_percent_stat = get_percentage_stat(cpus_stat, possible_cpu, tot_jiffies);
-    write_cpu_percent_stat(cpus_percent_stat, possible_cpu);
-    free(tot_jiffies);
-    free(cpus_percent_stat);
-    free(cpus_stat);
-    free(os_stat);
+    if((opt_flags & F_OPT_INTERVAL)){
+        struct cpustat* cpus_stat_p = malloc((possible_cpu + 1) * sizeof(struct cpustat));
+        if(cpus_stat_p == NULL){
+            printf("CPUS_STAT is NULL");
+            return -1;
+        }
+        struct cpustat* cpus_stat_c = malloc((possible_cpu + 1) * sizeof(struct cpustat));
+        if(cpus_stat_c == NULL){
+            printf("CPUS_STAT is NULL");
+            return -1;
+        }
+        loop(driver, interval, count, cpus_stat_p, cpus_stat_c);
+        return 0;
+    }
+    else{
+        struct cpustat* cpus_stat = malloc((possible_cpu + 1) * sizeof(struct cpustat));
+        if(cpus_stat == NULL){
+            printf("CPUS_STAT is NULL");
+            return -1;
+        }
+        struct os_stat* os_stat = malloc(sizeof(struct os_stat));
+        ioctl(driver, GET_OS_STAT, os_stat);
+        write_header(os_stat, possible_cpu);
+        ioctl(driver, GET_CPU_STAT_ALL, cpus_stat);
+        unsigned long long* tot_jiffies = get_global_cpu_mpstats(cpus_stat, possible_cpu);
+        struct cpu_percent_stat* cpus_percent_stat = get_percentage_stat(cpus_stat, possible_cpu, tot_jiffies);
+        write_cpu_percent_stat(cpus_percent_stat, possible_cpu);
+        free(tot_jiffies);
+        free(cpus_percent_stat);
+        free(cpus_stat);
+        free(os_stat);
+    }
     close(driver);
     return 0;
 }

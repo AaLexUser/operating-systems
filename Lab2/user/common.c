@@ -2,6 +2,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #define KEY_ALL "ALL"
 
@@ -57,7 +60,6 @@ int parse_values(char* strargv, uint8_t* cpu_mask, int max_value, const char * K
         return 0;
     }
     for (t = strtok(strargv, ","); t; t = strtok(NULL, ",")){
-        
         if(!strcmp(t, KEY_WORD)){
             cpu_mask[0] = 1;
         }
@@ -66,7 +68,7 @@ int parse_values(char* strargv, uint8_t* cpu_mask, int max_value, const char * K
                 return -1;
             }
             for(i = val_low; i <= val; i++){
-                cpu_mask[i] = 1;
+                cpu_mask[i + 1] = 1;
             }
         }
     }

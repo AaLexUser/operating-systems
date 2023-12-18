@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 void get_current_time(char* time_str);
 void get_current_date(char* date_str);
